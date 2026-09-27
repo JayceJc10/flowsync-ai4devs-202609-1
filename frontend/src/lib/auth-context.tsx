@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import * as api from '@/lib/api';
-import type { User } from '@/lib/api';
+import { ApiError, type User } from '@/lib/api';
 
 const TOKEN_STORAGE_KEY = 'flowsync_token';
 
@@ -32,6 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Skip re-hydrating when we already have the user in memory (e.g. right
+    // after login/signup just set it) — only fetch on initial mount with a
+    // stored token.
+    if (user) return;
+
     let cancelled = false;
     setStatus('loading');
 
@@ -42,10 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(profile);
         setStatus('authenticated');
       })
-      .catch(() => {
+      .catch((error) => {
         if (cancelled) return;
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
-        setToken(null);
+        // Only an actual auth failure invalidates the stored token; a
+        // transient network/server error shouldn't wipe a valid session.
+        if (error instanceof ApiError && error.status === 401) {
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+          setToken(null);
+        }
         setUser(null);
         setStatus('unauthenticated');
       });
@@ -53,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, user]);
 
   function persistSession(nextToken: string, nextUser: User) {
     localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);

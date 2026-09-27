@@ -2,10 +2,12 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3333/api/v1';
 
 export class ApiError extends Error {
   messages: string[];
+  status: number;
 
-  constructor(messages: string[]) {
+  constructor(messages: string[], status: number) {
     super(messages.join(' '));
     this.messages = messages;
+    this.status = status;
   }
 }
 
@@ -29,7 +31,7 @@ async function request<T>(path: string, options: RequestInit = {}, token?: strin
     } catch {
       // response body was not JSON, keep the generic message
     }
-    throw new ApiError(messages);
+    throw new ApiError(messages, response.status);
   }
 
   if (response.status === 204) return undefined as T;
