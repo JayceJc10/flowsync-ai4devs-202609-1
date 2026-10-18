@@ -22,13 +22,16 @@ export function LoginPage() {
     setError(null)
     setSubmitting(true)
     try {
-      const { token } = await login({ email: email.trim(), password })
+      const { token } = await login({
+        email: email.trim().toLowerCase(),
+        password,
+      })
       setSession(token)
       navigate('/profile', { replace: true })
     } catch (err) {
       setError(
         err instanceof ApiError
-          ? err.message
+          ? (Object.values(err.fieldErrors)[0] ?? err.message)
           : 'Ha ocurrido un error inesperado. Inténtalo de nuevo',
       )
       setSubmitting(false)
@@ -61,6 +64,7 @@ export function LoginPage() {
             type="email"
             autoComplete="email"
             required
+            maxLength={254}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />

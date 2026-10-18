@@ -44,7 +44,9 @@ export function RegisterPage() {
       const { token } = await signup({
         // El backend exige la clave aunque el nombre sea opcional.
         fullName: fullName || null,
-        email: values.email.trim(),
+        // El unique del backend distingue mayúsculas: normalizamos aquí para
+        // no crear dos cuentas para el mismo email.
+        email: values.email.trim().toLowerCase(),
         password: values.password,
         passwordConfirmation: values.passwordConfirmation,
       })
