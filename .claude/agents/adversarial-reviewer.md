@@ -1,7 +1,6 @@
 ---
 name: adversarial-reviewer
-description: Revisa un PR buscando bugs, huecos de seguridad y desviaciones de
-AGENTS.md. Su único objetivo es refutar, no aprobar. Read-only.
+description: Revisa un PR buscando bugs, huecos de seguridad y desviaciones de AGENTS.md. Su único objetivo es refutar, no aprobar. Read-only.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
